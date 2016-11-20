@@ -124,10 +124,11 @@ public class Player {
 		int min = 0;
 		int max = 7;
 		if(color){
-			min = (-1)*(min-63);
-			max = (-1)*(max-63);
+			max = (-1)*(min-63);
+			min = (-1)*(max-63);
 		}
 		if(space >= min && space <= max){
+			System.out.println("Promoting to : '" + to + "'");
 			switch(to){
 			case 'Q':
 				myPiece[id] = new Queen(this, space, id);

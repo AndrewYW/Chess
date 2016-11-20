@@ -63,7 +63,7 @@ public class Game {
 		resigned = false;
 		stalemate = false;
 		try {
-			File debug = new File("src/chess2/debug.txt");
+			File debug = new File("src/chess/debug.txt");
 			if(debug.exists() && !debug.isDirectory()){
 				kb = new Scanner(debug);				
 			}
@@ -219,6 +219,19 @@ public class Game {
 			}
 			if(move != null){
 				if(this.play_move(move)){
+					if(input.length() == 7){
+						if(turn){
+							if(move.getEnd() > 55 && move.getEnd() < 64){
+								System.out.println("White promotion to: " + input.toString().charAt(6) + " at index: " + move.getEnd() + " Piece ID: " + board.space[move.getEnd()].getID());
+								white.promote(move.getEnd(), board.space[move.getEnd()].getID(), input.toString().charAt(6));
+								System.out.println("Piece: " + board.space[move.getEnd()].toString());
+							}
+						}else{
+							if(move.getEnd() > -1 && move.getEnd() < 8){
+								black.promote(move.getEnd(), 15, input.toString().charAt(6));
+							}
+						}
+					}
 					needs_input = false;
 				}
 				else
