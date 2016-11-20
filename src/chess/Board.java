@@ -7,7 +7,7 @@ package chess;
  *
  */
 public class Board {
-	public Piece[] space;
+	private Piece[] space;
 	private Player white, black;
 	private int enpassantable;
 	/**

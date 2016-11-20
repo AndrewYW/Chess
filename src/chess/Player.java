@@ -120,15 +120,10 @@ public class Player {
 	 * @param id The ID of the piece to be promoted
 	 * @param to The char for which piece the pawn wants to be replaced with.
 	 */
-	public void promote(int space, int id, char to){
-		int min = 0;
-		int max = 7;
-		if(color){
-			max = (-1)*(min-63);
-			min = (-1)*(max-63);
-		}
+	public boolean promote(int space, int id, char to){
+		int min = (color) ? 56 : 0;
+		int max = (color) ? 63 : 7;
 		if(space >= min && space <= max){
-			System.out.println("Promoting to : '" + to + "'");
 			switch(to){
 			case 'Q':
 				myPiece[id] = new Queen(this, space, id);
@@ -143,7 +138,10 @@ public class Player {
 				myPiece[id] = new Knight(this, space, id);
 				break;
 			}
+			board.loadBoard();
+			return true;
 		}
+		return false;
 	}
 	
 	/**
@@ -200,6 +198,11 @@ public class Player {
 		if(!color){num = (-1)*(num-63);} //flips orientation of pieces for black placement.
 		myPiece[15] = new Pawn(this, num, 15);
 	}
+	
+	public void demote(int id){
+        myPiece[id] = new Pawn(this, myPiece[id].getSpace(), id);
+        System.out.println("Demoted" + this);
+    }
 	
 	/**
 	 * Method to return the color of a piece

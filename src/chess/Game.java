@@ -48,6 +48,8 @@ public class Game {
 	 */
 	private Scanner kb;
 	
+	private char promoto;
+	
 	/**
 	 * Game constructor. Will also attempt to take an input text file for debugging.
 	 */
@@ -62,6 +64,7 @@ public class Game {
 		draw = false;
 		resigned = false;
 		stalemate = false;
+		promoto = 'Q';
 		try {
 			File debug = new File("src/chess/debug.txt");
 			if(debug.exists() && !debug.isDirectory()){
@@ -83,6 +86,7 @@ public class Game {
 	public void play(){
 		boolean inGame = true;
 		while(inGame){
+			board.loadBoard();
 			if(isCheckmate()){
 				System.out.println("Checkmate");
 				String winner = (!turn) ?"White":"Black";
@@ -211,6 +215,20 @@ public class Game {
 					move = this.parse_move(input.substring(0, 6));
 					if(move == null)
 						System.out.println("Bad input.");
+					switch(input.charAt(6)){
+					case 'Q':
+					case 'R':
+					case 'B':
+					case 'N':
+					    promoto = input.charAt(6);
+					    break;
+					case 'P':
+					case 'K':
+					default:
+					    System.out.println("Bad input.");
+					    move = null; //forces ask for new input
+					    break;
+					}
 				}
 					
 				else{
@@ -222,13 +240,11 @@ public class Game {
 					if(input.length() == 7){
 						if(turn){
 							if(move.getEnd() > 55 && move.getEnd() < 64){
-								System.out.println("White promotion to: " + input.toString().charAt(6) + " at index: " + move.getEnd() + " Piece ID: " + board.space[move.getEnd()].getID());
-								white.promote(move.getEnd(), board.space[move.getEnd()].getID(), input.toString().charAt(6));
-								System.out.println("Piece: " + board.space[move.getEnd()].toString());
+								white.promote(move.getEnd(), board.getPiece_atSpace(move.getEnd()).getID(), input.toString().charAt(6));
 							}
 						}else{
 							if(move.getEnd() > -1 && move.getEnd() < 8){
-								black.promote(move.getEnd(), 15, input.toString().charAt(6));
+								black.promote(move.getEnd(), board.getPiece_atSpace(move.getEnd()).getID(), input.toString().charAt(6));
 							}
 						}
 					}
@@ -391,10 +407,12 @@ public class Game {
 		else{
 			if(this.try_move(actual_move)){
 				this.do_move(actual_move);
+				promoto = 'Q';
 				return true;
 			}
-			else
+			else{
 				return false;
+			}
 		}
 	}
 	
@@ -406,6 +424,7 @@ public class Game {
 	public boolean try_move(Move m){
 		boolean result = false;
 		boolean canCastle = true;
+		boolean promoted = false;
 		Piece temp = null;
 
 		if(m.isEnp()){
@@ -453,9 +472,27 @@ public class Game {
 			}
 		}
 		board.getPiece_atSpace(m.getStart()).occupy(m.getEnd());
+		board.loadBoard();
+		if(board.getPiece_atSpace(m.getEnd()).toString().charAt(1)=='P'){
+		    if(turn){
+		        promoted = white.promote(m.getEnd(), board.getPiece_atSpace(m.getEnd()).getID(), promoto);
+		    }
+		    else{
+		        promoted = black.promote(m.getEnd(), board.getPiece_atSpace(m.getEnd()).getID(), promoto);
+		    }
+		    
+		}
 		board.loadBoard();		
 		result = !this.isInCheck() && canCastle;
 		board.getPiece_atSpace(m.getEnd()).occupy(m.getStart());
+		board.loadBoard();
+		if(promoted){
+		    if(turn){
+		        white.demote(board.getPiece_atSpace(m.getStart()).getID());
+		    }
+		    else
+		        black.demote(board.getPiece_atSpace(m.getStart()).getID());
+		}
 		if(m.isEnp()){
 			if(!turn)
 				white.re_add(temp);
@@ -543,6 +580,12 @@ public class Game {
 		else{
 			board.set_enpassantable(-1);
 		}
-		//System.out.println("("+m.getStart()+" "+m.getEnd()+")"); //For Debugging
+		if(board.getPiece_atSpace(m.getEnd()).toString().charAt(1)=='P'){
+		    if(turn)
+		        white.promote(m.getEnd(), board.getPiece_atSpace(m.getEnd()).getID(), promoto);
+		    else
+		        black.promote(m.getEnd(), board.getPiece_atSpace(m.getEnd()).getID(), promoto);
+		}
+		board.loadBoard();
 	}
 }
